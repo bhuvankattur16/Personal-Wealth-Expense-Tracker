@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Personal Wealth & Expense Tracker</title>
+  <meta name="description" content="Track your income and expenses, visualize spending by category, and manage your personal finances all in one place." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <!-- Header -->
+  <header class="header">
+    <div class="header-content">
+      <div class="logo">
+        <div class="logo-icon">₹</div>
+        <div>
+          <h1 class="logo-title">WealthTrack</h1>
+          <p class="logo-subtitle">Personal Finance Manager</p>
+        </div>
+      </div>
+      <button class="btn-add" id="btnOpenModal" aria-label="Add new transaction">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+        Add Transaction
+      </button>
+    </div>
+  </header>
+
+  <main class="main">
+    <!-- Summary Cards -->
+    <section class="summary-section" aria-label="Financial Summary">
+      <div class="summary-card card-income">
+        <div class="card-icon-wrap income-icon">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg>
+        </div>
+        <div class="card-body">
+          <p class="card-label">Total Income</p>
+          <p class="card-amount" id="totalIncome">₹0.00</p>
+        </div>
+      </div>
+      <div class="summary-card card-expense">
+        <div class="card-icon-wrap expense-icon">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="23 18 13.5 8.5 8.5 13.5 1 6"/><polyline points="17 18 23 18 23 12"/></svg>
+        </div>
+        <div class="card-body">
+          <p class="card-label">Total Expenses</p>
+          <p class="card-amount" id="totalExpenses">₹0.00</p>
+        </div>
+      </div>
+      <div class="summary-card card-balance">
+        <div class="card-icon-wrap balance-icon">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="7" width="20" height="14" rx="2" ry="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></svg>
+        </div>
+        <div class="card-body">
+          <p class="card-label">Net Balance</p>
+          <p class="card-amount" id="netBalance">₹0.00</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- Chart & History -->
+    <section class="dashboard-grid">
+      <!-- Chart -->
+      <div class="panel chart-panel">
+        <div class="panel-header">
+          <h2 class="panel-title">Expense Breakdown</h2>
+          <div class="chart-type-toggle">
+            <button class="toggle-btn active" id="btnPie" aria-pressed="true">Pie</button>
+            <button class="toggle-btn" id="btnBar" aria-pressed="false">Bar</button>
+          </div>
+        </div>
+        <div class="chart-container" id="chartContainer">
+          <canvas id="expenseChart" aria-label="Expense breakdown chart"></canvas>
+          <div class="chart-empty" id="chartEmpty">
+            <div class="empty-icon">📊</div>
+            <p>No expense data yet</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Transaction History -->
+      <div class="panel history-panel">
+        <div class="panel-header">
+          <h2 class="panel-title">Transaction History</h2>
+          <span class="tx-count" id="txCount">0 entries</span>
+        </div>
+
+        <!-- Filters -->
+        <div class="filter-bar">
+          <select class="filter-select" id="filterType" aria-label="Filter by type">
+            <option value="all">All Types</option>
+            <option value="income">Income</option>
+            <option value="expense">Expense</option>
+          </select>
+          <select class="filter-select" id="filterCategory" aria-label="Filter by category">
+            <option value="all">All Categories</option>
+          </select>
+        </div>
+
+        <!-- Empty State -->
+        <div class="empty-state" id="emptyState">
+          <div class="empty-illustration">
+            <svg width="80" height="80" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2" opacity="0.4"><rect x="2" y="7" width="20" height="14" rx="2" ry="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></svg>
+          </div>
+          <h3>No transactions yet</h3>
+          <p>Get started by adding your first transaction!</p>
+          <button class="btn-add btn-empty-cta" id="btnEmptyCta">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+            Add Transaction
+          </button>
+        </div>
+
+        <!-- Transaction List -->
+        <ul class="tx-list" id="txList" aria-live="polite" aria-label="Transaction list"></ul>
+      </div>
+    </section>
+  </main>
+
+  <!-- Add / Edit Modal -->
+  <div class="modal-overlay" id="modalOverlay" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+    <div class="modal">
+      <div class="modal-header">
+        <h3 class="modal-title" id="modalTitle">Add Transaction</h3>
+        <button class="modal-close" id="btnCloseModal" aria-label="Close modal">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+        </button>
+      </div>
+
+      <form class="modal-form" id="txForm" novalidate>
+        <input type="hidden" id="txId" />
+
+        <div class="type-selector" role="group" aria-label="Transaction type">
+          <label class="type-option" id="labelIncome">
+            <input type="radio" name="type" value="income" id="typeIncome" checked />
+            <span class="type-btn income-btn">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/></svg>
+              Income
+            </span>
+          </label>
+          <label class="type-option" id="labelExpense">
+            <input type="radio" name="type" value="expense" id="typeExpense" />
+            <span class="type-btn expense-btn">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="23 18 13.5 8.5 8.5 13.5 1 6"/></svg>
+              Expense
+            </span>
+          </label>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="txTitle">Title <span class="required">*</span></label>
+          <input class="form-input" type="text" id="txTitle" placeholder="e.g., Monthly Salary, Grocery Run" maxlength="80" autocomplete="off" />
+          <p class="field-error" id="errorTitle"></p>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label" for="txAmount">Amount (₹) <span class="required">*</span></label>
+            <input class="form-input" type="number" id="txAmount" placeholder="0.00" min="0.01" step="0.01" />
+            <p class="field-error" id="errorAmount"></p>
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="txCategory">Category <span class="required">*</span></label>
+            <select class="form-input form-select" id="txCategory">
+              <option value="">Select category...</option>
+            </select>
+            <p class="field-error" id="errorCategory"></p>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="txDate">Date</label>
+          <input class="form-input" type="date" id="txDate" />
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="txNote">Note (optional)</label>
+          <textarea class="form-input form-textarea" id="txNote" placeholder="Add a short note..." maxlength="200" rows="2"></textarea>
+        </div>
+
+        <div class="modal-actions">
+          <button type="button" class="btn-cancel" id="btnCancel">Cancel</button>
+          <button type="submit" class="btn-submit" id="btnSubmit">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+            Save Transaction
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Toast notification -->
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+  <!-- Delete Confirm Dialog -->
+  <div class="modal-overlay" id="deleteOverlay" role="alertdialog" aria-modal="true" aria-labelledby="deleteTitle">
+    <div class="modal delete-modal">
+      <div class="delete-icon-wrap">
+        <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4h6v2"/></svg>
+      </div>
+      <h3 class="modal-title" id="deleteTitle">Delete Transaction?</h3>
+      <p class="delete-msg">This action cannot be undone.</p>
+      <div class="modal-actions">
+        <button class="btn-cancel" id="btnDeleteCancel">Cancel</button>
+        <button class="btn-delete-confirm" id="btnDeleteConfirm">Delete</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.2/dist/chart.umd.min.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
